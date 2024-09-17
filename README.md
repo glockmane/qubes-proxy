@@ -36,7 +36,7 @@ Next sing-box will be installed into the `/rw/usrlocal/bin` directory, and the c
 The daemon runtime configuration file `sing-box.service` is installed into the `/rw/bind-dirs/etc/systemd/system` directory.
 
 After completing the installation, you need to change `outbounds` in `/rw/bind-dirs/etc/sing-box.json` to your own proxy service.
-更多配置信息请参照[Sing-box 配置](https://sing-box.sagernet.org/configuration/)。
+Refer to [Sing-box Configuration](https://sing-box.sagernet.org/configuration/) for more configuration information.
 
 ```bash
 [user@dom0 ~]$ qvm-start sys-proxy
