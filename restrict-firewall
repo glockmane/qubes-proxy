@@ -35,7 +35,9 @@ nft 'insert rule ip filter FORWARD iifname "eth0" counter drop'
 
 # Ensure only traffic destined for the tun+ interface is forwarded
 iptables -F QBS-FORWARD
+nft flush chain ip filter QBS-FORWARD
 iptables -A QBS-FORWARD -o tun+ -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+nft 'add rule ip filter QBS-FORWARD oifname "tun*" tcp flags syn / syn,rst counter tcp option maxseg size set rt mtu'
 iptables -A QBS-FORWARD -i vif+ -o tun+ -j ACCEPT
 iptables -A QBS-FORWARD -j DROP
 
