@@ -25,7 +25,7 @@ fi
 # Stop all leaks between downstream (vif+) and upstream (Internet eth0):
 #iptables -F OUTPUT
 nft flush chain ip filter OUTPUT
-#iptables -P FORWARD DROP
+iptables -P FORWARD DROP
 Translation not implemented
 
 #iptables -I FORWARD -o eth0 -j DROP
