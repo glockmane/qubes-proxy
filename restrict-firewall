@@ -44,10 +44,10 @@ nft 'add rule ip filter QBS-FORWARD iifname "vif*" oifname "tun*" counter accept
 nft 'add rule ip filter QBS-FORWARD counter drop'
 
 # Block INPUT from proxy(s):
-#iptables -P INPUT DROP
-Translation not implemented
-#iptables -I INPUT -i tun+ -j DROP
-nft 'insert rule ip filter INPUT iifname "tun*" counter drop'
+##iptables -P INPUT DROP
+#Translation not implemented
+##iptables -I INPUT -i tun+ -j DROP
+#nft 'insert rule ip filter INPUT iifname "tun*" counter drop'
 
 # Restrict connections to tun device only
 iptables -D INPUT -j DROP
@@ -58,8 +58,8 @@ nft 'add rule ip filter INPUT iifname "tun*" counter accept'
 nft 'add rule ip filter INPUT counter drop'
 
 # Allow established traffic:
-#iptables -A INPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
-nft 'add rule ip filter INPUT ct stage established counter accept'
+##iptables -A INPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
+#nft 'add rule ip filter INPUT ct stage established counter accept'
 
 # Allow DNS lookups from local via tun device
 if [ -n "${NS1}" ]; then
