@@ -118,5 +118,5 @@ nft 'insert rule ip filter OUTPUT tcp flags fin,syn / fin,syn counter reject wit
 nft 'insert rule ip filter OUTPUT tcp flags fin,syn,rst,ack / fin,syn,rst,psh,ack,urg counter reject with icmp type admin-prohibited'
 #iptables -I OUTPUT -m state --state INVALID -j REJECT --reject-with icmp-admin-prohibited
 nft 'insert rule ip filter OUTPUT ct state invalid counter reject with icmp type admin-prohibited'
-iptables -I OUTPUT -m conntrack --ctstate INVALID -j REJECT --reject-with icmp-admin-prohibited
+#iptables -I OUTPUT -m conntrack --ctstate INVALID -j REJECT --reject-with icmp-admin-prohibited
 nft 'insert rule ip filter OUTPUT ct state invalid counter reject with icmp type admin-prohibited'
