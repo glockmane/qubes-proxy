@@ -25,8 +25,9 @@ fi
 # Stop all leaks between downstream (vif+) and upstream (Internet eth0):
 #iptables -F OUTPUT
 nft flush chain ip filter OUTPUT
-!iptables -P FORWARD DROP
-!Translation not implemented
+#iptables -P FORWARD DROP
+nft add table inet filter
+nft add chain inet filter forward { type filter hook forward priority 0 \; policy drop \; }
 
 #iptables -I FORWARD -o eth0 -j DROP
 nft 'insert rule ip filter FORWARD oifname "eth0" counter drop'
@@ -50,8 +51,8 @@ nft 'add rule ip filter QBS-FORWARD counter drop'
 #nft 'insert rule ip filter INPUT iifname "tun*" counter drop'
 
 # Restrict connections to tun device only
-!iptables -D INPUT -j DROP
-!Translation not implemented
+#iptables -D INPUT -j DROP
+nft delete rule inet filter input drop
 #iptables -A INPUT -i tun+ -j ACCEPT
 nft 'add rule ip filter INPUT iifname "tun*" counter accept'
 #iptables -A INPUT -j DROP
@@ -76,11 +77,19 @@ if [ -n "${NS2}" ]; then
 fi
 
 # Disable icmp packets
-!if iptables -C INPUT -i vif+ -p icmp -j ACCEPT; then
-!  iptables -D INPUT -i vif+ -p icmp -j ACCEPT
+#if iptables -C INPUT -i vif+ -p icmp -j ACCEPT; then
+#  iptables -D INPUT -i vif+ -p icmp -j ACCEPT
+#fi
+nft list chain inet filter input | grep -q 'iifname "vif+" icmp accept'
+if [ $? -eq 0 ]; then
+  nft delete rule inet filter input iifname "vif+" ip protocol icmp accept
 fi
-!if iptables -C INPUT -i vif+ -j REJECT --reject-with icmp-host-prohibited; then
-!  iptables -D INPUT -i vif+ -j REJECT --reject-with icmp-host-prohibited
+#if iptables -C INPUT -i vif+ -j REJECT --reject-with icmp-host-prohibited; then
+#  iptables -D INPUT -i vif+ -j REJECT --reject-with icmp-host-prohibited
+#fi
+nft list chain inet filter input | grep -q 'iifname "vif+" reject with icmp host-prohibited'
+if [ $? -eq 0 ]; then
+  nft delete rule inet filter input iifname "vif+" reject with icmp host-prohibited
 fi
 #iptables -I INPUT -p icmp -j DROP
 nft 'insert rule ip filter INPUT ip protocol icmp counter drop'
