@@ -39,10 +39,13 @@ nft flush chain ip filter QBS-FORWARD
 iptables -A QBS-FORWARD -o tun+ -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 nft 'add rule ip filter QBS-FORWARD oifname "tun*" tcp flags syn / syn,rst counter tcp option maxseg size set rt mtu'
 iptables -A QBS-FORWARD -i vif+ -o tun+ -j ACCEPT
+nft 'add rule ip filter QBS-FORWARD iifname "vif*" oifname "tun*" counter accept'
 iptables -A QBS-FORWARD -j DROP
+nft 'add rule ip filter QBS-FORWARD counter drop'
 
 # Block INPUT from proxy(s):
 #iptables -P INPUT DROP
+Translation not implemented
 #iptables -I INPUT -i tun+ -j DROP
 
 # Restrict connections to tun device only
