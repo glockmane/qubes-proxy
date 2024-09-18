@@ -108,9 +108,14 @@ nft 'insert rule ip filter OUTPUT tcp flags 0x0 / fin,syn,rst,psh,ack,urg counte
 iptables -I OUTPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j REJECT --reject-with icmp-admin-prohibited
 nft 'insert rule ip filter OUTPUT tcp flags fin,syn,rst,psh,ack,urg / fin,syn,rst,psh,ack,urg counter reject with icmp type admin-prohibited'
 iptables -I OUTPUT -f -j REJECT --reject-with icmp-admin-prohibited
-
+nft 'insert rule ip filter OUTPUT ip frag-off & 0x1fff != 0 counter reject with icmp type admin-prohibited'
 iptables -I OUTPUT -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j REJECT --reject-with icmp-admin-prohibited
+nft 'insert rule ip filter OUTPUT tcp flags syn,rst / syn,rst counter reject with icmp type admin-prohibited'
 iptables -I OUTPUT -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j REJECT --reject-with icmp-admin-prohibited
+nft 'insert rule ip filter OUTPUT tcp flags fin,syn / fin,syn counter reject with icmp type admin-prohibited'
 iptables -I OUTPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,ACK -j REJECT --reject-with icmp-admin-prohibited
+nft 'insert rule ip filter OUTPUT tcp flags fin,syn,rst,ack / fin,syn,rst,psh,ack,urg counter reject with icmp type admin-prohibited'
 iptables -I OUTPUT -m state --state INVALID -j REJECT --reject-with icmp-admin-prohibited
+nft 'insert rule ip filter OUTPUT ct state invalid counter reject with icmp type admin-prohibited'
 iptables -I OUTPUT -m conntrack --ctstate INVALID -j REJECT --reject-with icmp-admin-prohibited
+nft 'insert rule ip filter OUTPUT ct state invalid counter reject with icmp type admin-prohibited'
