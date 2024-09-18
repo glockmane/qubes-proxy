@@ -24,9 +24,14 @@ fi
 
 # Stop all leaks between downstream (vif+) and upstream (Internet eth0):
 iptables -F OUTPUT
+nft flush chain ip filter OUTPUT
 iptables -P FORWARD DROP
+Translation not implemented
+
 iptables -I FORWARD -o eth0 -j DROP
+nft 'insert rule ip filter FORWARD oifname "eth0" counter drop'
 iptables -I FORWARD -i eth0 -j DROP
+nft 'insert rule ip filter FORWARD iifname "eth0" counter drop'
 
 # Ensure only traffic destined for the tun+ interface is forwarded
 iptables -F QBS-FORWARD
