@@ -64,12 +64,15 @@ nft 'add rule ip filter INPUT ct stage established counter accept'
 # Allow DNS lookups from local via tun device
 if [ -n "${NS1}" ]; then
   iptables -I INPUT -i tun+ -p udp -s "${NS1}" --sport 53 -m state --state ESTABLISHED -j ACCEPT
-
+  nft 'insert rule ip filter INPUT iifname "tun*" ip saddr "${NS1}" udp sport 53 ct state established counter accept'
   iptables -I INPUT -i tun+ -p tcp -s "${NS1}" --sport 53 -m state --state ESTABLISHED -j ACCEPT
+  nft 'insert rule ip filter INPUT iifname "tun*" ip saddr "${NS1}" tcp sport 53 ct state established counter accept'
 fi
 if [ -n "${NS2}" ]; then
   iptables -I INPUT -i tun+ -p udp -s "${NS2}" --sport 53 -m state --state ESTABLISHED -j ACCEPT
+  nft 'insert rule ip filter INPUT iifname "tun*" ip saddr "${NS2}" udp sport 53 ct state established counter accept'
   iptables -I INPUT -i tun+ -p tcp -s "${NS2}" --sport 53 -m state --state ESTABLISHED -j ACCEPT
+  nft 'insert rule ip filter INPUT iifname "tun*" ip saddr "${NS2}" tcp sport 53 ct state established counter accept'
 fi
 
 # Disable icmp packets
