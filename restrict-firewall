@@ -86,12 +86,19 @@ iptables -I INPUT -p icmp -j DROP
 
 # Drop invalid connections
 iptables -I INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
+nft 'insert rule ip filter INPUT tcp flags 0x0 / fin,syn,rst,psh,ack,urg counter drop'
 iptables -I INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
+nft 'insert rule ip filter INPUT tcp flags fin,syn,rst,psh,ack,urg / fin,syn,rst,psh,ack,urg counter drop'
 iptables -I INPUT -f -j DROP
+nft 'insert rule ip filter INPUT ip frag-off & 0x1fff != 0 counter drop'
 iptables -I INPUT -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
+nft 'insert rule ip filter INPUT tcp flags syn,rst / syn,rst counter drop'
 iptables -I INPUT -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
+nft 'insert rule ip filter INPUT tcp flags fin,syn / fin,syn counter drop'
 iptables -I INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,ACK -j DROP
+nft 'insert rule ip filter INPUT tcp flags fin,syn,rst,ack / fin,syn,rst,psh,ack,urg counter drop'
 iptables -I INPUT -m state --state INVALID -j DROP
+
 iptables -I INPUT -m conntrack --ctstate INVALID -j DROP
 iptables -I OUTPUT -m state --state ESTABLISHED -j ACCEPT
 iptables -I OUTPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j REJECT --reject-with icmp-admin-prohibited
