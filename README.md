@@ -2,7 +2,7 @@
 
 This is a program to install a proxy network tool ([sing-box](https://sing-box.sagernet.org/)) in Qubes OS, designed to help Qubes OS users break through the blockade in a heavily censored network environment and give Qubes OS the ability to connect to the Tor network.
 
-The project's main repository is on [sourcehut](https://git.sr.ht/~qubes/proxy) and is mirrored on [GitHub](https://github.com/hexstore/qubes-proxy).
+The project's main repository is on on [GitHub](https://github.com/glockmane/qubes-proxy).
 
 ## How it works
 
@@ -40,7 +40,7 @@ Refer to [Sing-box Configuration](https://sing-box.sagernet.org/configuration/) 
 
 ```bash
 [user@dom0 ~]$ qvm-start sys-proxy
-[user@dom0 ~]$ qrexec-client -W -d sys-proxy user:'sh <(curl --proto "=https" -tlsv1.2 -SfL https://git.sr.ht/~qubes/proxy/blob/main/install.sh)'
+[user@dom0 ~]$ qrexec-client -W -d sys-proxy user:'sh <(curl --proto "=https" -tlsv1.2 -SfL https://git.sr.ht/~glockmane/qubes_poxy/blob/main/install.sh)'
 ```
 
 When you come to this step, you will have to restart the `sys-proxy` box.
@@ -61,10 +61,6 @@ Finally, configure the application or service box's `netvm` to `sys-proxy`, and 
 ```bash
 [user@dom0 ~]$ qvm-prefs sys-whonix netvm sys-proxy
 ```
-
-## Contribution
-
-Any problems or questions you find while using this program, feel free to [create ticket](https://todo.sr.ht/~qubes/proxy) and we will answer them as soon as possible. Also, you are welcome to submit a [patch](https://git.sr.ht/~qubes/proxy/send-email) for any improvement program.
 
 ## Related
 
