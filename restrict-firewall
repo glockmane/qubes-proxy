@@ -23,109 +23,67 @@ if [ -z "${NS2}" ]; then
 fi
 
 # Stop all leaks between downstream (vif+) and upstream (Internet eth0):
-#iptables -F OUTPUT
 nft flush chain ip filter OUTPUT
-#iptables -P FORWARD DROP
 nft add table inet filter
 nft add chain inet filter forward { type filter hook forward priority 0 \; policy drop \; }
 
-#iptables -I FORWARD -o eth0 -j DROP
 nft 'insert rule ip filter FORWARD oifname "eth0" counter drop'
-#iptables -I FORWARD -i eth0 -j DROP
 nft 'insert rule ip filter FORWARD iifname "eth0" counter drop'
 
 # Ensure only traffic destined for the tun+ interface is forwarded
-#iptables -F QBS-FORWARD
 nft flush chain ip filter QBS-FORWARD
-#iptables -A QBS-FORWARD -o tun+ -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 nft 'add rule ip filter QBS-FORWARD oifname "tun*" tcp flags syn / syn,rst counter tcp option maxseg size set rt mtu'
-#iptables -A QBS-FORWARD -i vif+ -o tun+ -j ACCEPT
 nft 'add rule ip filter QBS-FORWARD iifname "vif*" oifname "tun*" counter accept'
-#iptables -A QBS-FORWARD -j DROP
 nft 'add rule ip filter QBS-FORWARD counter drop'
 
 # Block INPUT from proxy(s):
 ##iptables -P INPUT DROP
 #Translation not implemented
-##iptables -I INPUT -i tun+ -j DROP
 #nft 'insert rule ip filter INPUT iifname "tun*" counter drop'
 
 # Restrict connections to tun device only
-#iptables -D INPUT -j DROP
 nft delete rule inet filter input drop
-#iptables -A INPUT -i tun+ -j ACCEPT
 nft 'add rule ip filter INPUT iifname "tun*" counter accept'
-#iptables -A INPUT -j DROP
 nft 'add rule ip filter INPUT counter drop'
 
 # Allow established traffic:
-##iptables -A INPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
-#nft 'add rule ip filter INPUT ct stage established counter accept'
+#nft 'add rule ip filter INPUT ct state established counter accept'
 
 # Allow DNS lookups from local via tun device
 if [ -n "${NS1}" ]; then
-#  iptables -I INPUT -i tun+ -p udp -s "${NS1}" --sport 53 -m state --state ESTABLISHED -j ACCEPT
   nft 'insert rule ip filter INPUT iifname "tun*" ip saddr "${NS1}" udp sport 53 ct state established counter accept'
-#  iptables -I INPUT -i tun+ -p tcp -s "${NS1}" --sport 53 -m state --state ESTABLISHED -j ACCEPT
   nft 'insert rule ip filter INPUT iifname "tun*" ip saddr "${NS1}" tcp sport 53 ct state established counter accept'
 fi
 if [ -n "${NS2}" ]; then
-#  iptables -I INPUT -i tun+ -p udp -s "${NS2}" --sport 53 -m state --state ESTABLISHED -j ACCEPT
   nft 'insert rule ip filter INPUT iifname "tun*" ip saddr "${NS2}" udp sport 53 ct state established counter accept'
-#  iptables -I INPUT -i tun+ -p tcp -s "${NS2}" --sport 53 -m state --state ESTABLISHED -j ACCEPT
   nft 'insert rule ip filter INPUT iifname "tun*" ip saddr "${NS2}" tcp sport 53 ct state established counter accept'
 fi
 
 # Disable icmp packets
-#if iptables -C INPUT -i vif+ -p icmp -j ACCEPT; then
-#  iptables -D INPUT -i vif+ -p icmp -j ACCEPT
-#fi
 nft list chain inet filter input | grep -q 'iifname "vif+" icmp accept'
 if [ $? -eq 0 ]; then
   nft delete rule inet filter input iifname "vif+" ip protocol icmp accept
 fi
-#if iptables -C INPUT -i vif+ -j REJECT --reject-with icmp-host-prohibited; then
-#  iptables -D INPUT -i vif+ -j REJECT --reject-with icmp-host-prohibited
-#fi
 nft list chain inet filter input | grep -q 'iifname "vif+" reject with icmp host-prohibited'
 if [ $? -eq 0 ]; then
   nft delete rule inet filter input iifname "vif+" reject with icmp host-prohibited
 fi
-#iptables -I INPUT -p icmp -j DROP
 nft 'insert rule ip filter INPUT ip protocol icmp counter drop'
 
 # Drop invalid connections
-#iptables -I INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
 nft 'insert rule ip filter INPUT tcp flags 0x0 / fin,syn,rst,psh,ack,urg counter drop'
-#iptables -I INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
 nft 'insert rule ip filter INPUT tcp flags fin,syn,rst,psh,ack,urg / fin,syn,rst,psh,ack,urg counter drop'
-#iptables -I INPUT -f -j DROP
 nft 'insert rule ip filter INPUT ip frag-off & 0x1fff != 0 counter drop'
-#iptables -I INPUT -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
 nft 'insert rule ip filter INPUT tcp flags syn,rst / syn,rst counter drop'
-#iptables -I INPUT -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
 nft 'insert rule ip filter INPUT tcp flags fin,syn / fin,syn counter drop'
-#iptables -I INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,ACK -j DROP
 nft 'insert rule ip filter INPUT tcp flags fin,syn,rst,ack / fin,syn,rst,psh,ack,urg counter drop'
-#iptables -I INPUT -m state --state INVALID -j DROP
 nft 'insert rule ip filter INPUT ct state invalid counter drop'
-#iptables -I INPUT -m conntrack --ctstate INVALID -j DROP
-nft 'insert rule ip filter INPUT ct state invalid counter drop'
-#iptables -I OUTPUT -m state --state ESTABLISHED -j ACCEPT
 nft 'insert rule ip filter OUTPUT ct state established counter accept'
-#iptables -I OUTPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j REJECT --reject-with icmp-admin-prohibited
 nft 'insert rule ip filter OUTPUT tcp flags 0x0 / fin,syn,rst,psh,ack,urg counter reject with icmp type admin-prohibited'
-#iptables -I OUTPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j REJECT --reject-with icmp-admin-prohibited
 nft 'insert rule ip filter OUTPUT tcp flags fin,syn,rst,psh,ack,urg / fin,syn,rst,psh,ack,urg counter reject with icmp type admin-prohibited'
-#iptables -I OUTPUT -f -j REJECT --reject-with icmp-admin-prohibited
 nft 'insert rule ip filter OUTPUT ip frag-off & 0x1fff != 0 counter reject with icmp type admin-prohibited'
-#iptables -I OUTPUT -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j REJECT --reject-with icmp-admin-prohibited
 nft 'insert rule ip filter OUTPUT tcp flags syn,rst / syn,rst counter reject with icmp type admin-prohibited'
-#iptables -I OUTPUT -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j REJECT --reject-with icmp-admin-prohibited
 nft 'insert rule ip filter OUTPUT tcp flags fin,syn / fin,syn counter reject with icmp type admin-prohibited'
-#iptables -I OUTPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,ACK -j REJECT --reject-with icmp-admin-prohibited
 nft 'insert rule ip filter OUTPUT tcp flags fin,syn,rst,ack / fin,syn,rst,psh,ack,urg counter reject with icmp type admin-prohibited'
-#iptables -I OUTPUT -m state --state INVALID -j REJECT --reject-with icmp-admin-prohibited
 nft 'insert rule ip filter OUTPUT ct state invalid counter reject with icmp type admin-prohibited'
-#iptables -I OUTPUT -m conntrack --ctstate INVALID -j REJECT --reject-with icmp-admin-prohibited
 nft 'insert rule ip filter OUTPUT ct state invalid counter reject with icmp type admin-prohibited'
