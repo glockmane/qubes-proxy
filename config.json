@@ -32,7 +32,6 @@
   "outbounds": [
     {
       "tag": "proxy",
-      "type": "", // your proxy profile here
       "type": "socks", 
       "server": "127.0.0.1",
       "server_port": 1080,
