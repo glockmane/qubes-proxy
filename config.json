@@ -32,7 +32,14 @@
   "outbounds": [
     {
       "tag": "proxy",
-      "type": "", // your proxy profile here
+      "type": "socks", 
+      "server": "127.0.0.1",
+      "server_port": 1080,
+      "version": "5",
+      "username": "sekai",
+      "password": "admin",
+      "network": "udp",
+      "udp_over_tcp": false
     },
     {
       "type": "direct",
