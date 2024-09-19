@@ -32,10 +32,10 @@ Here create a proxy box, which is named `sys-proxy`, and then download the [sing
 [user@dom0 ~]$ qvm-prefs sys-proxy maxmem 500
 ```
 
-Next sing-box will be installed into the `/rw/usrlocal/bin` directory, and the configuration file `sing-box.json` is installed into the `/rw/bind-dirs/etc/sing-box` directory.
+Next sing-box will be installed into the `/rw/usrlocal/bin` directory, and the configuration file `config.json` is installed into the `/rw/bind-dirs/etc/sing-box` directory.
 The daemon runtime configuration file `sing-box.service` is installed into the `/rw/bind-dirs/etc/systemd/system` directory.
 
-After completing the installation, you need to change `outbounds` in `/rw/bind-dirs/etc/sing-box.json` to your own proxy service.
+After completing the installation, you need to change `outbounds` in `/rw/bind-dirs/etc/sing-box/config.json` to your own proxy service.
 Refer to [Sing-box Configuration](https://sing-box.sagernet.org/configuration/) for more configuration information.
 
 ```bash
