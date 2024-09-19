@@ -40,7 +40,7 @@ Refer to [Sing-box Configuration](https://sing-box.sagernet.org/configuration/) 
 
 ```bash
 [user@dom0 ~]$ qvm-start sys-proxy
-[user@dom0 ~]$ qrexec-client -W -d sys-proxy user:'sh <(curl --proto "=https" -tlsv1.2 -SfL https://github.com/glockmane/qubes-proxy/blob/main/install.sh)'
+[user@dom0 ~]$ qrexec-client -W -d sys-proxy user:'sh <(curl --proto "=https" -tlsv1.2 -SfL https://raw.githubusercontent.com/glockmane/qubes-proxy/refs/heads/main/install.sh)'
 ```
 
 When you come to this step, you will have to restart the `sys-proxy` box.
