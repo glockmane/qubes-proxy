@@ -42,7 +42,7 @@ nft 'add rule qubes QBS-FORWARD counter drop'
 #nft 'insert rule qubes INPUT iifname "tun*" counter drop'
 
 # Restrict connections to tun device only
-nft delete rule ip qubes input drop
+nft delete rule qubes input drop
 nft 'add rule qubes INPUT iifname "tun*" counter accept'
 nft 'add rule qubes INPUT counter drop'
 
@@ -84,5 +84,5 @@ nft 'insert rule qubes OUTPUT tcp flags fin,syn,rst,psh,ack,urg / fin,syn,rst,ps
 nft 'insert rule qubes OUTPUT ip frag-off & 0x1fff != 0 counter reject with icmp type admin-prohibited'
 nft 'insert rule qubes OUTPUT tcp flags syn,rst / syn,rst counter reject with icmp type admin-prohibited'
 nft 'insert rule qubes OUTPUT tcp flags fin,syn / fin,syn counter reject with icmp type admin-prohibited'
-nft 'insert rule ip qubes OUTPUT tcp flags fin,syn,rst,ack / fin,syn,rst,psh,ack,urg counter reject with icmp type admin-prohibited'
-nft 'insert rule ip qubes OUTPUT ct state invalid counter reject with icmp type admin-prohibited'
+nft 'insert rule qubes OUTPUT tcp flags fin,syn,rst,ack / fin,syn,rst,psh,ack,urg counter reject with icmp type admin-prohibited'
+nft 'insert rule qubes OUTPUT ct state invalid counter reject with icmp type admin-prohibited'
