@@ -24,8 +24,8 @@ fi
 
 # Stop all leaks between downstream (vif+) and upstream (Internet eth0):
 nft flush chain ip filter OUTPUT
-nft add table inet filter
-nft add chain inet filter forward { type filter hook forward priority 0 \; policy drop \; }
+nft add table ip filter
+nft add chain ip filter forward { type filter hook forward priority 0 \; policy drop \; }
 
 nft 'insert rule ip filter FORWARD oifname "eth0" counter drop'
 nft 'insert rule ip filter FORWARD iifname "eth0" counter drop'
@@ -42,7 +42,7 @@ nft 'add rule ip filter QBS-FORWARD counter drop'
 #nft 'insert rule ip filter INPUT iifname "tun*" counter drop'
 
 # Restrict connections to tun device only
-nft delete rule inet filter input drop
+nft delete rule ip filter input drop
 nft 'add rule ip filter INPUT iifname "tun*" counter accept'
 nft 'add rule ip filter INPUT counter drop'
 
@@ -60,13 +60,13 @@ if [ -n "${NS2}" ]; then
 fi
 
 # Disable icmp packets
-nft list chain inet filter input | grep -q 'iifname "vif+" icmp accept'
+nft list chain ip filter input | grep -q 'iifname "vif+" icmp accept'
 if [ $? -eq 0 ]; then
-  nft delete rule inet filter input iifname "vif+" ip protocol icmp accept
+  nft delete rule ip filter input iifname "vif+" ip protocol icmp accept
 fi
-nft list chain inet filter input | grep -q 'iifname "vif+" reject with icmp host-prohibited'
+nft list chain ip filter input | grep -q 'iifname "vif+" reject with icmp host-prohibited'
 if [ $? -eq 0 ]; then
-  nft delete rule inet filter input iifname "vif+" reject with icmp host-prohibited
+  nft delete rule ip filter input iifname "vif+" reject with icmp host-prohibited
 fi
 nft 'insert rule ip filter INPUT ip protocol icmp counter drop'
 
