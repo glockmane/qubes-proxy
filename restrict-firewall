@@ -23,66 +23,66 @@ if [ -z "${NS2}" ]; then
 fi
 
 # Stop all leaks between downstream (vif+) and upstream (Internet eth0):
-nft flush chain ip qubes OUTPUT
-nft add table ip qubes
-nft add chain ip qubes forward { type filter hook forward priority 0 \; policy drop \; }
+nft flush chain qubes OUTPUT
+nft add table qubes
+nft add chain qubes forward { type filter hook forward priority 0 \; policy drop \; }
 
-nft 'insert rule ip qubes FORWARD oifname "eth0" counter drop'
-nft 'insert rule ip qubes FORWARD iifname "eth0" counter drop'
+nft 'insert rule qubes FORWARD oifname "eth0" counter drop'
+nft 'insert rule qubes FORWARD iifname "eth0" counter drop'
 
 # Ensure only traffic destined for the tun+ interface is forwarded
-nft flush chain ip qubes QBS-FORWARD
-nft 'add rule ip qubes QBS-FORWARD oifname "tun*" tcp flags syn / syn,rst counter tcp option maxseg size set rt mtu'
-nft 'add rule ip qubes QBS-FORWARD iifname "vif*" oifname "tun*" counter accept'
-nft 'add rule ip qubes QBS-FORWARD counter drop'
+nft flush chain qubes QBS-FORWARD
+nft 'add rule qubes QBS-FORWARD oifname "tun*" tcp flags syn / syn,rst counter tcp option maxseg size set rt mtu'
+nft 'add rule qubes QBS-FORWARD iifname "vif*" oifname "tun*" counter accept'
+nft 'add rule qubes QBS-FORWARD counter drop'
 
 # Block INPUT from proxy(s):
 ##iptables -P INPUT DROP
 #Translation not implemented
-#nft 'insert rule ip qubes INPUT iifname "tun*" counter drop'
+#nft 'insert rule qubes INPUT iifname "tun*" counter drop'
 
 # Restrict connections to tun device only
 nft delete rule ip qubes input drop
-nft 'add rule ip qubes INPUT iifname "tun*" counter accept'
-nft 'add rule ip qubes INPUT counter drop'
+nft 'add rule qubes INPUT iifname "tun*" counter accept'
+nft 'add rule qubes INPUT counter drop'
 
 # Allow established traffic:
-#nft 'add rule ip qubes INPUT ct state established counter accept'
+#nft 'add rule qubes INPUT ct state established counter accept'
 
 # Allow DNS lookups from local via tun device
 if [ -n "${NS1}" ]; then
-  nft 'insert rule ip qubes INPUT iifname "tun*" ip saddr "${NS1}" udp sport 53 ct state established counter accept'
-  nft 'insert rule ip qubes INPUT iifname "tun*" ip saddr "${NS1}" tcp sport 53 ct state established counter accept'
+  nft 'insert rule qubes INPUT iifname "tun*" ip saddr "${NS1}" udp sport 53 ct state established counter accept'
+  nft 'insert rule qubes INPUT iifname "tun*" ip saddr "${NS1}" tcp sport 53 ct state established counter accept'
 fi
 if [ -n "${NS2}" ]; then
-  nft 'insert rule ip qubes INPUT iifname "tun*" ip saddr "${NS2}" udp sport 53 ct state established counter accept'
-  nft 'insert rule ip qubes INPUT iifname "tun*" ip saddr "${NS2}" tcp sport 53 ct state established counter accept'
+  nft 'insert rule qubes INPUT iifname "tun*" ip saddr "${NS2}" udp sport 53 ct state established counter accept'
+  nft 'insert rule qubes INPUT iifname "tun*" ip saddr "${NS2}" tcp sport 53 ct state established counter accept'
 fi
 
 # Disable icmp packets
-nft list chain ip qubes input | grep -q 'iifname "vif+" icmp accept'
+nft list chain qubes input | grep -q 'iifname "vif+" icmp accept'
 if [ $? -eq 0 ]; then
-  nft delete rule ip qubes input iifname "vif+" ip protocol icmp accept
+  nft delete rule qubes input iifname "vif+" ip protocol icmp accept
 fi
-nft list chain ip qubes input | grep -q 'iifname "vif+" reject with icmp host-prohibited'
+nft list chain qubes input | grep -q 'iifname "vif+" reject with icmp host-prohibited'
 if [ $? -eq 0 ]; then
-  nft delete rule ip qubes input iifname "vif+" reject with icmp host-prohibited
+  nft delete rule qubes input iifname "vif+" reject with icmp host-prohibited
 fi
-nft 'insert rule ip qubes INPUT ip protocol icmp counter drop'
+nft 'insert rule qubes INPUT ip protocol icmp counter drop'
 
 # Drop invalid connections
-nft 'insert rule ip qubes INPUT tcp flags 0x0 / fin,syn,rst,psh,ack,urg counter drop'
-nft 'insert rule ip qubes INPUT tcp flags fin,syn,rst,psh,ack,urg / fin,syn,rst,psh,ack,urg counter drop'
-nft 'insert rule ip qubes INPUT ip frag-off & 0x1fff != 0 counter drop'
-nft 'insert rule ip qubes INPUT tcp flags syn,rst / syn,rst counter drop'
-nft 'insert rule ip qubes INPUT tcp flags fin,syn / fin,syn counter drop'
-nft 'insert rule ip qubes INPUT tcp flags fin,syn,rst,ack / fin,syn,rst,psh,ack,urg counter drop'
-nft 'insert rule ip qubes INPUT ct state invalid counter drop'
-nft 'insert rule ip qubes OUTPUT ct state established counter accept'
-nft 'insert rule ip qubes OUTPUT tcp flags 0x0 / fin,syn,rst,psh,ack,urg counter reject with icmp type admin-prohibited'
-nft 'insert rule ip qubes OUTPUT tcp flags fin,syn,rst,psh,ack,urg / fin,syn,rst,psh,ack,urg counter reject with icmp type admin-prohibited'
-nft 'insert rule ip qubes OUTPUT ip frag-off & 0x1fff != 0 counter reject with icmp type admin-prohibited'
-nft 'insert rule ip qubes OUTPUT tcp flags syn,rst / syn,rst counter reject with icmp type admin-prohibited'
-nft 'insert rule ip qubes OUTPUT tcp flags fin,syn / fin,syn counter reject with icmp type admin-prohibited'
+nft 'insert rule qubes INPUT tcp flags 0x0 / fin,syn,rst,psh,ack,urg counter drop'
+nft 'insert rule qubes INPUT tcp flags fin,syn,rst,psh,ack,urg / fin,syn,rst,psh,ack,urg counter drop'
+nft 'insert rule qubes INPUT ip frag-off & 0x1fff != 0 counter drop'
+nft 'insert rule qubes INPUT tcp flags syn,rst / syn,rst counter drop'
+nft 'insert rule qubes INPUT tcp flags fin,syn / fin,syn counter drop'
+nft 'insert rule qubes INPUT tcp flags fin,syn,rst,ack / fin,syn,rst,psh,ack,urg counter drop'
+nft 'insert rule qubes INPUT ct state invalid counter drop'
+nft 'insert rule qubes OUTPUT ct state established counter accept'
+nft 'insert rule qubes OUTPUT tcp flags 0x0 / fin,syn,rst,psh,ack,urg counter reject with icmp type admin-prohibited'
+nft 'insert rule qubes OUTPUT tcp flags fin,syn,rst,psh,ack,urg / fin,syn,rst,psh,ack,urg counter reject with icmp type admin-prohibited'
+nft 'insert rule qubes OUTPUT ip frag-off & 0x1fff != 0 counter reject with icmp type admin-prohibited'
+nft 'insert rule qubes OUTPUT tcp flags syn,rst / syn,rst counter reject with icmp type admin-prohibited'
+nft 'insert rule qubes OUTPUT tcp flags fin,syn / fin,syn counter reject with icmp type admin-prohibited'
 nft 'insert rule ip qubes OUTPUT tcp flags fin,syn,rst,ack / fin,syn,rst,psh,ack,urg counter reject with icmp type admin-prohibited'
 nft 'insert rule ip qubes OUTPUT ct state invalid counter reject with icmp type admin-prohibited'
