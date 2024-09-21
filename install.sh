@@ -14,7 +14,6 @@ INET4_ADDR="$(echo "${NS1}" | sed 's/[0-9]*$/0/')"
 
 cd "${WORKDIR}"
 
-#curl --proto '=https' -tlsv1.2 -sSfL "${REMOTE}/restrict-firewall" -o restrict-firewall
 curl --proto '=https' -tlsv1.2 -sSfL "${REMOTE}/sing-box.service" -o sing-box.service
 curl --proto '=https' -tlsv1.2 -sSfL "${REMOTE}/50_sing-box.conf" -o 50_sing-box.conf
 curl --proto '=https' -tlsv1.2 -sSfL "${REMOTE}/config.json" -o config.json
@@ -23,7 +22,6 @@ sed -i "s#10.139.1.0#${INET4_ADDR}#" config.json
 
 sudo install -Dm644 -t /rw/bind-dirs/etc/sing-box "${WORKDIR}/config.json"
 sudo install -Dm644 -t /rw/bind-dirs/etc/systemd/system/ "${WORKDIR}/sing-box.service"
-#sudo install -Dm755 -t /rw/config/qubes-firewall.d "${WORKDIR}/restrict-firewall"
 sudo install -Dm644 -t /rw/config/qubes-bind-dirs.d "${WORKDIR}/50_sing-box.conf"
 
 sudo cp /rw/config/rc.local /rw/config/rc.local.old
