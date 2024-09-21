@@ -22,10 +22,19 @@
   "inbounds": [
     {
       "type": "tun",
-      "stack": "gvisor",
+      "tag": "tun-in",
+      "interface_name": "singtun0",
       "inet4_address": "10.139.1.0/30",
       "strict_route": true,
       "auto_route": true,
+      "inet4_route_exclude_address": [
+        "10.137.0.0/16",
+        "10.138.0.0/16"
+      ],
+      "inet6_route_exclude_address": [
+        "fd09:24ef:4179::a89:0/112",
+        "fd09:24ef:4179::a8a:0/112"
+      ],
       "sniff": true
     }
   ],
