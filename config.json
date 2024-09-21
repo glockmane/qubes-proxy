@@ -47,8 +47,8 @@
       "version": "5",
       "username": "sekai",
       "password": "admin",
-      "network": "udp",
-      "udp_over_tcp": false
+      "network": "tcp"
+      #"udp_over_tcp": false
     },
     {
       "type": "direct",
