@@ -7,7 +7,6 @@ set -eux pipefail
 # shellcheck source=/dev/null
 . /var/run/qubes/qubes-ns
 
-#REMOTE="${REMOTE:-https://github.com/glockmane/qubes-proxy/blob/main}"
 REMOTE="${REMOTE:-https://raw.githubusercontent.com/glockmane/qubes-proxy/refs/heads/main}"
 WORKDIR="/tmp"
 INET4_ADDR="$(echo "${NS1}" | sed 's/[0-9]*$/0/')"
